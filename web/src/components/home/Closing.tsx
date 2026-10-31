@@ -33,7 +33,7 @@ export function Footer() {
     <footer className="border-t border-line">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-sm text-muted sm:flex-row sm:px-6">
         <span className="flex items-center gap-2">
-          <LogoMark className="h-4 w-4" /> Second Brain
+          <LogoMark className="h-5 w-5" /> Second Brain
         </span>
         <span className="font-mono text-xs">One agent. One person.</span>
       </div>
