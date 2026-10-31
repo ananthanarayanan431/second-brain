@@ -77,7 +77,7 @@ export function SourcesPanel() {
   return (
     <div className="space-y-8">
       <p className="text-muted">
-        Teach your second brain a new source. It reads it, pulls out the claims, and wires them
+        Teach Neramind a new source. It reads it, pulls out the claims, and wires them
         into its knowledge graph. Sources must be on the allowlist in{" "}
         <code className="font-mono text-sm text-text">publications.yaml</code>.
       </p>

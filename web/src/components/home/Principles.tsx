@@ -24,9 +24,9 @@ export function Principles() {
     <section id="what" className="scroll-mt-16 border-b border-line">
       <div className="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-5">
         <div className="lg:col-span-2">
-          <SectionHeading eyebrow="What is a second brain?" title="Not a chatbot. A brain that grows with you.">
-            Your first brain is busy. Your second brain remembers what you read, understands what
-            matters to you, and keeps track of the details you would rather not.
+          <SectionHeading eyebrow="What is Neramind?" title="Not a chatbot. A mind that grows with you.">
+            Your own mind is busy living the day. Neramind watches how that day actually goes,
+            remembers what you read, and keeps track of the details you would rather not.
           </SectionHeading>
         </div>
         <ol className="space-y-4 lg:col-span-3">

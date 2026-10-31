@@ -61,7 +61,7 @@ export function Logo() {
   return (
     <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight text-text">
       <LogoMark className="h-7 w-7" />
-      <span>Second Brain</span>
+      <span>Neramind</span>
     </Link>
   );
 }

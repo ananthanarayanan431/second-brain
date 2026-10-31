@@ -17,7 +17,7 @@ function Phone() {
     <div className="mx-auto w-full max-w-xs rounded-3xl border border-line bg-panel p-3">
       <div className="rounded-2xl border border-line bg-ink p-5">
         <div className="flex items-center justify-between font-mono text-xs text-muted">
-          <span>Second Brain</span>
+          <span>Neramind</span>
           <span className="flex items-center gap-1.5 text-accent">
             <span aria-hidden="true" className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
             listening
@@ -61,7 +61,7 @@ export function VoiceAgent() {
           <StatusBadge status="soon" />
           <div className="mt-4">
             <SectionHeading eyebrow="Voice first" title="Double-tap. Talk. Done.">
-              Your second brain lives on your phone. Double-tap and speak, the way you would to an
+              Neramind lives on your phone. Double-tap and speak, the way you would to an
               assistant who already knows your day. No apps to open, no forms to fill.
             </SectionHeading>
           </div>

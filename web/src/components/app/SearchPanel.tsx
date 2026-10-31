@@ -105,7 +105,7 @@ export function SearchPanel() {
 
       <div aria-live="polite">
         {state.kind === "idle" && (
-          <EmptyState title="Search everything your second brain has read" art={ART.search}>
+          <EmptyState title="Search everything Neramind has read" art={ART.search}>
             Compare modes on the same query to see what each one finds.
           </EmptyState>
         )}

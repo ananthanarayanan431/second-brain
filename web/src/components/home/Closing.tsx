@@ -14,11 +14,11 @@ export function FinalCta() {
               Start with what works today.
             </h2>
             <p className="mt-4 text-lg text-muted">
-              Ask your second brain a question, search everything it has read, or teach it a new
-              source. It gets smarter from here.
+              Ask Neramind a question, search everything it has read, or teach it a new source. It
+              learns your days from here.
             </p>
             <Link href="/app" className={`${buttonPrimary} mt-8`}>
-              Try Second Brain <span aria-hidden="true">→</span>
+              Try Neramind <span aria-hidden="true">→</span>
             </Link>
           </div>
           <Illustration {...ART.grow} box={240} className="md:w-64" />
@@ -33,7 +33,7 @@ export function Footer() {
     <footer className="border-t border-line">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-sm text-muted sm:flex-row sm:px-6">
         <span className="flex items-center gap-2">
-          <LogoMark className="h-5 w-5" /> Second Brain
+          <LogoMark className="h-5 w-5" /> Neramind
         </span>
         <span className="font-mono text-xs">One agent. One person.</span>
       </div>

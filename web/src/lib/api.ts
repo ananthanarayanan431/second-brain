@@ -18,7 +18,7 @@ export class ApiError extends Error {
 }
 
 const UNREACHABLE =
-  "Can’t reach the Second Brain backend. Start it with `make app` (and `make services`).";
+  "Can’t reach the Neramind backend. Start it with `make app` (and `make services`).";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;

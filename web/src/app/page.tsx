@@ -3,6 +3,7 @@ import { Capabilities } from "@/components/home/Capabilities";
 import { FinalCta, Footer } from "@/components/home/Closing";
 import { DayBalance } from "@/components/home/DayBalance";
 import { Hero } from "@/components/home/Hero";
+import { NameMeaning } from "@/components/home/NameMeaning";
 import { Nav } from "@/components/home/Nav";
 import { Principles } from "@/components/home/Principles";
 import { VoiceAgent } from "@/components/home/VoiceAgent";
@@ -18,6 +19,7 @@ export default function HomePage() {
         <Capabilities />
         <DayBalance />
         <AgentToAgent />
+        <NameMeaning />
         <FinalCta />
       </main>
       <Footer />

@@ -7,9 +7,9 @@ const heading = Newsreader({ variable: "--font-heading", subsets: ["latin"] });
 const code = JetBrains_Mono({ variable: "--font-code", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: { default: "Second Brain", template: "%s · Second Brain" },
+  title: { default: "Neramind", template: "%s · Neramind" },
   description:
-    "Your own AI agent. It learns how you think, remembers what you read, and acts for you.",
+    "Neramind is a mind for your time: your own AI agent that learns how your days go, remembers what you read, and suggests the right thing at the right moment.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

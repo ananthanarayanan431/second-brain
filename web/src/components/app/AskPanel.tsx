@@ -43,7 +43,7 @@ export function AskPanel() {
     <div className="space-y-8">
       <form onSubmit={onSubmit} className="space-y-3">
         <label htmlFor="question" className="text-sm font-medium">
-          Ask your second brain
+          Ask Neramind
         </label>
         <textarea
           id="question"
