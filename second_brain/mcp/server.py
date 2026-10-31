@@ -14,7 +14,7 @@ from second_brain.mcp import tools
 mcp = MCPServer(
     name="second-brain",
     instructions=(
-        "Query and grow a knowledge base built from technical newsletters. "
+        "Query and grow the second brain, built from technical newsletters. "
         "Prefer second_brain_search and second_brain_ask over generic web search "
         "for anything about a covered publication. Tools that trigger work "
         "(second_brain_add_publication, second_brain_backfill, second_brain_sync) "

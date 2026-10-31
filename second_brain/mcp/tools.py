@@ -101,7 +101,7 @@ async def second_brain_search(
 
 async def second_brain_ask(
     question: typing.Annotated[
-        str, Field(description="Technical question to answer from the knowledge base")
+        str, Field(description="Technical question to answer from the second brain")
     ],
 ) -> dict[str, object]:
     """Answer a technical question using 3-way hybrid retrieval and inline citations.
@@ -220,7 +220,7 @@ async def second_brain_job_status(
 
 
 async def second_brain_list_publications() -> dict[str, object]:
-    """List all publications in the knowledge base alongside article counts and sync metadata."""
+    """List all publications in the second brain alongside article counts and sync metadata."""
     async with get_session() as session:
         pubs = await list_publications_with_stats(session)
     return {"publications": pubs}

@@ -1,0 +1,177 @@
+"""POST /ask: answer a question from the second brain, with inline citations.
+
+This is a fast read, so it never creates an Inngest run. A workflow engine is
+for expensive work you'd hate to lose; here someone is waiting, and retrying
+in three minutes is useless. So `ask_question` talks to Postgres and the LLM
+provider directly, saves a snapshot of everything it did, and only then sends a
+fire-and-forget `second-brain/answer.produced` event for the evaluators of week 5.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import contextlib
+import logging
+import time
+from datetime import UTC, datetime
+from typing import Any
+
+import inngest
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from second_brain.agents.prompts import ASK_SYNTHESIZER_SYSTEM_PROMPT
+from second_brain.agents.providers import call_llm, llm_configured
+from second_brain.config import settings
+from second_brain.inngest_client import client
+from second_brain.retrieval.hybrid import hybrid_search
+from second_brain.retrieval.snapshot import record_snapshot
+from second_brain.schemas.events import ANSWER_PRODUCED, AnswerProduced
+
+logger = logging.getLogger(__name__)
+
+# asyncio only keeps weak references to tasks: a fire-and-forget task nobody
+# holds on to can be garbage-collected before it finishes.
+_background_tasks: set[asyncio.Task[None]] = set()
+
+SYSTEM_PROMPT = ASK_SYNTHESIZER_SYSTEM_PROMPT
+
+
+def _format_context(passages: list[dict[str, Any]]) -> str:
+    parts = []
+    for idx, p in enumerate(passages, start=1):
+        header = (
+            f"[{idx}] (Title: {p.get('title', 'Unknown')} | "
+            f"Author: {p.get('author') or 'Unknown'} | URL: {p.get('url')})"
+        )
+        body = str(p.get("text", ""))
+        if p.get("claim_text"):
+            claim_type = p.get("claim_type") or "claim"
+            body = f"Attributed Claim ({claim_type}): {p['claim_text']}\nPassage: {body}"
+        parts.append(f"{header}\n{body}")
+    return "\n\n".join(parts)
+
+
+def _citation(idx: int, passage: dict[str, Any]) -> dict[str, Any]:
+    cit: dict[str, Any] = {
+        "citation_idx": idx,
+        "passage_id": passage["passage_id"],
+        "title": passage["title"],
+        "author": passage["author"],
+        "url": passage["url"],
+    }
+    if passage.get("claim_id"):
+        cit["claim_id"] = passage["claim_id"]
+        cit["claim_type"] = passage.get("claim_type")
+    return cit
+
+
+def _newest_date(passages: list[dict[str, Any]]) -> datetime | None:
+    dates: list[datetime] = []
+    for p in passages:
+        raw = p.get("published_at")
+        if raw:
+            with contextlib.suppress(ValueError):
+                dates.append(datetime.fromisoformat(str(raw)))
+    return max(dates) if dates else None
+
+
+async def _synthesize(question: str, passages: list[dict[str, Any]]) -> str:
+    prompt = (
+        f"Context passages:\n{_format_context(passages)}\n\n"
+        f"Question: {question}\n\n"
+        "Answer with inline citations:"
+    )
+    try:
+        # Not inside an Inngest step, so CostCaptureMiddleware never sees this
+        # call: persist_cost writes its cost row directly.
+        result = await call_llm(
+            system_prompt=SYSTEM_PROMPT,
+            user_input=prompt,
+            model=settings.synthesis_model,
+            max_tokens=settings.synthesis_max_tokens,
+            persist_cost=True,
+        )
+    except Exception as exc:
+        logger.exception("LLM synthesis failed")
+        return f"LLM synthesis failed ({type(exc).__name__}): {exc}"
+    return str(result["output"])
+
+
+async def _emit_answer_produced(snapshot_id: str, retriever_variant: str) -> None:
+    try:
+        await client.send(
+            inngest.Event(
+                name=ANSWER_PRODUCED,
+                data=AnswerProduced(
+                    snapshot_id=snapshot_id, retriever_variant=retriever_variant
+                ).model_dump(mode="json"),
+            )
+        )
+    except Exception:
+        # Telemetry must never fail the user's request, but it shouldn't fail
+        # silently either. The snapshot is already committed, so nothing is lost.
+        logger.exception("Failed to emit %s for %s", ANSWER_PRODUCED, snapshot_id)
+
+
+async def ask_question(
+    session: AsyncSession, question: str, limit: int | None = None
+) -> dict[str, Any]:
+    start_time = time.perf_counter()
+    retriever_variant = f"hybrid_3way_rrf_k{settings.rrf_k}"
+
+    # 1. Hybrid retrieval: the top passages go into the prompt, ALL candidates
+    #    go into the snapshot.
+    top_passages, all_candidates = await hybrid_search(
+        session, query=question, limit=limit or settings.retrieval_limit
+    )
+
+    # 2. Answer with the configured LLM, citing passages as [1], [2], ...
+    if not top_passages:
+        answer_text = "No relevant passages were found in the second brain for this question."
+        citations: list[dict[str, Any]] = []
+    elif not llm_configured():
+        answer_text = (
+            f"Retrieved {len(top_passages)} relevant passages with hybrid search. "
+            "Set the API key for LLM_PROVIDER to get an answer with inline citations."
+        )
+        citations = [_citation(i, p) for i, p in enumerate(top_passages, start=1)]
+    else:
+        answer_text = await _synthesize(question, top_passages)
+        # Only the passages the model actually cited become citations.
+        citations = [
+            _citation(i, p) for i, p in enumerate(top_passages, start=1) if f"[{i}]" in answer_text
+        ]
+
+    # 3. as_of: publication date of the newest CITED source (falls back to all
+    #    retrieved passages, then to now), so readers know how fresh the answer is.
+    cited_ids = {c["passage_id"] for c in citations}
+    cited = [p for p in top_passages if p["passage_id"] in cited_ids]
+    as_of = _newest_date(cited) or _newest_date(top_passages) or datetime.now(tz=UTC)
+
+    latency_ms = int((time.perf_counter() - start_time) * 1000)
+
+    # 4. Snapshot first, and committed, BEFORE anything is sent anywhere.
+    snapshot_id = await record_snapshot(
+        session,
+        question=question,
+        answer_text=answer_text,
+        citations=citations,
+        retrieved=all_candidates,
+        retriever_variant=retriever_variant,
+        as_of=as_of,
+        latency_ms=latency_ms,
+    )
+    await session.commit()
+
+    # 5. Fire-and-forget: the user doesn't wait for the event to be delivered.
+    task = asyncio.create_task(_emit_answer_produced(snapshot_id, retriever_variant))
+    _background_tasks.add(task)
+    task.add_done_callback(_background_tasks.discard)
+
+    return {
+        "answer": answer_text,
+        "citations": citations,
+        "as_of": as_of.isoformat(),
+        "snapshot_id": snapshot_id,
+        "latency_ms": latency_ms,
+    }
