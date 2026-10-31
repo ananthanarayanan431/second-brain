@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,6 +11,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # --- External services ---
+    # Backend used by `call_llm`. The *_model settings below must use this
+    # provider's model IDs (e.g. `anthropic/...` IDs on OpenRouter).
+    llm_provider: Literal["anthropic", "openrouter"] = "anthropic"
     anthropic_api_key: str = ""
     openai_api_key: str = ""
     # OpenRouter exposes an OpenAI-compatible API, so it is called with the
@@ -72,9 +77,10 @@ class Settings(BaseSettings):
     extraction_max_tokens: int = 4096
     graph_retrieval_limit: int = 15
     concurrency_extract_claims: int = 2
-    # Anthropic Claude Sonnet pricing per million tokens (USD) for CostCaptureMiddleware
-    anthropic_input_price_per_million_tokens: float = 3.00
-    anthropic_output_price_per_million_tokens: float = 15.00
+    # Fallback USD price per million tokens for models missing from
+    # MODEL_PRICING_PER_MTOK in agents/providers.py (Claude Sonnet 5.5 rates).
+    anthropic_input_price_per_million_tokens: float = 2.00
+    anthropic_output_price_per_million_tokens: float = 10.00
 
     # --- Evaluation suite & binary LLM judges (week 5) ---
     eval_judge_model: str = "claude-sonnet-5-5"
