@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 .PHONY: help install start services app stop logs reset nuke db-clear \
 	migrate migration downgrade db-current mcp calibrate replay \
-	format lint test check
+	format lint test check web-install web web-build web-check
 
 -include .env
 export
@@ -91,6 +91,21 @@ calibrate: ## Calibrate the LLM judges: make calibrate MODE=live (default offlin
 
 replay: ## Replay backfill: make replay ARGS="--verify" (or --all, --slug <slug>)
 	uv run python scripts/replay_backfill.py $(or $(ARGS),--verify)
+
+# --- Web (Next.js, in web/) -------------------------------------------------
+
+web-install: ## Install the web app's dependencies (pnpm)
+	pnpm --dir web install
+
+web: ## Run the web app on http://localhost:3001 (needs `make app` for the API)
+	pnpm --dir web dev
+
+web-build: ## Production build of the web app
+	pnpm --dir web build
+
+web-check: ## Type-check and lint the web app
+	pnpm --dir web typecheck
+	pnpm --dir web lint
 
 # --- Quality ---------------------------------------------------------------
 
