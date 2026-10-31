@@ -36,6 +36,10 @@ MODEL_PRICING_PER_MTOK: dict[str, tuple[float, float]] = {
     "claude-opus-5-5": (4.00, 20.00),
     "claude-sonnet-5-5": (2.00, 10.00),
     "claude-haiku-5-5": (0.10, 0.50),
+    # OpenAI models via OpenRouter; verified 2026-10-31 against openrouter.ai/api/v1/models.
+    "gpt-4.1-mini": (0.40, 1.60),
+    "gpt-4.1-nano": (0.10, 0.40),
+    "gpt-4o-mini": (0.15, 0.60),
 }
 
 _CODE_FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL)

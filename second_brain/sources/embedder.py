@@ -1,5 +1,9 @@
 """OpenAI embeddings, batched into as few provider calls as possible.
 
+Calls OpenAI directly when OPENAI_API_KEY is set; otherwise falls back to the
+same model through OpenRouter's OpenAI-compatible embeddings endpoint using
+OPENROUTER_API_KEY (OpenRouter namespaces the model ID as `openai/...`).
+
 Returns a JSON-serializable dict carrying a top-level `"usage"` key — the
 convention `CostCaptureMiddleware` (`second_brain/inngest_client.py`) recognizes to
 record cost into the `costs` table, without every embedding/LLM call site
@@ -15,12 +19,30 @@ from second_brain.config import settings
 _client: AsyncOpenAI | None = None
 
 
+def _uses_openrouter() -> bool:
+    return not settings.openai_api_key and bool(settings.openrouter_api_key)
+
+
+def _provider_model() -> str:
+    """Model ID to send to the provider; OpenRouter wants the `openai/` prefix."""
+    model = settings.embedding_model
+    if _uses_openrouter() and "/" not in model:
+        return f"openai/{model}"
+    return model
+
+
 def _get_client() -> AsyncOpenAI:
     # Created on first use, not at import time, so modules that import this one
-    # (and the tests) load fine without OPENAI_API_KEY.
+    # (and the tests) load fine without an API key.
     global _client
     if _client is None:
-        _client = AsyncOpenAI(api_key=settings.openai_api_key)
+        if _uses_openrouter():
+            _client = AsyncOpenAI(
+                api_key=settings.openrouter_api_key,
+                base_url=settings.openrouter_base_url,
+            )
+        else:
+            _client = AsyncOpenAI(api_key=settings.openai_api_key)
     return _client
 
 
@@ -42,7 +64,7 @@ async def embed_texts(texts: list[str]) -> dict:
         batch = texts[start : start + settings.embedding_batch_size]
         response = await _get_client().embeddings.create(
             input=batch,
-            model=settings.embedding_model,
+            model=_provider_model(),
             dimensions=settings.embedding_dimensions,
         )
         # The API does not guarantee response order matches input order.
