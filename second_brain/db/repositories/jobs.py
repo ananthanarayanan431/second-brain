@@ -50,19 +50,19 @@ async def get_job_status(session: AsyncSession, event_id: str) -> dict[str, obje
 
     Only articles written since the job started count towards it: a backfill of a
     publication that already has articles must not look finished before it starts.
+
+    A job without `publication_id` has no article evidence to read, so only the
+    progress already stored in `jobs.done` counts; it is never assumed finished.
     """
     job = await get_job(session, event_id)
     if job is None:
         return None
-    done = (
-        job.total
-        if job.publication_id is None
-        else min(
-            await count_articles_for_publication_since(session, job.publication_id, job.created_at),
-            job.total,
+    done = job.done
+    if job.publication_id is not None:
+        ingested = await count_articles_for_publication_since(
+            session, job.publication_id, job.created_at
         )
-    )
-    done = max(done, job.done)
+        done = max(min(ingested, job.total), job.done)
     if done != job.done:
         job.done = done
     if done >= job.total and job.status != "completed":

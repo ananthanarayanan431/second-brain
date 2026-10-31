@@ -84,7 +84,9 @@ async def insert_passages_fresh(
 
 
 async def count_passages(session: AsyncSession) -> int:
-    return (await session.execute(select(func.count()).select_from(Passage))).scalar_one()
+    """Count active passages (`valid_to IS NULL`); superseded versions are history."""
+    stmt = select(func.count()).select_from(Passage).where(Passage.valid_to.is_(None))
+    return (await session.execute(stmt)).scalar_one()
 
 
 async def search_passages_bm25(

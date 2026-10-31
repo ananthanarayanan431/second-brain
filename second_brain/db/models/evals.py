@@ -42,6 +42,11 @@ class EvalResult(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    # When the snapshot was last evaluated. Set explicitly by the upsert, because
+    # `onupdate` does not fire for INSERT ... ON CONFLICT DO UPDATE.
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
 
 class EvalRun(Base):

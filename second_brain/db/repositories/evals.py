@@ -54,6 +54,7 @@ async def upsert_eval_result(
                 "disagreement_critique": disagreement_critique,
                 "failure_codes": failure_codes,
                 "composite_score": composite_score,
+                "updated_at": func.now(),
             },
         )
         .returning(EvalResult.id)
@@ -109,7 +110,7 @@ async def get_latest_eval_report(session: AsyncSession, limit: int = 10) -> dict
     eval_rows = list(
         (
             await session.execute(
-                select(EvalResult).order_by(EvalResult.created_at.desc()).limit(limit)
+                select(EvalResult).order_by(EvalResult.updated_at.desc()).limit(limit)
             )
         ).scalars()
     )
@@ -140,6 +141,7 @@ async def get_latest_eval_report(session: AsyncSession, limit: int = 10) -> dict
                 "disagreement_verdict": row.disagreement_verdict,
                 "failure_codes": list(row.failure_codes or []),
                 "created_at": row.created_at.isoformat(),
+                "updated_at": row.updated_at.isoformat(),
             }
         )
 

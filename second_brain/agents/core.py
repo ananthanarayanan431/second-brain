@@ -74,6 +74,22 @@ async def run_agent[T: BaseModel](
 
     A `StructuredAgent[T]` returns a validated `T`; a `TextAgent` returns `str`.
     """
+    output, _ = await _run_agent_step(step, agent, user_input, step_id, article_id)
+    return output
+
+
+async def _run_agent_step[T: BaseModel](
+    step: inngest.Step,
+    agent: StructuredAgent[T] | TextAgent,
+    user_input: str,
+    step_id: str,
+    article_id: UUID | None,
+) -> tuple[T | str, float]:
+    """Run one memoized LLM step and return `(output, est_usd)`.
+
+    The cost comes from the step's own `usage`, so a replayed step reports the
+    same cost as the original call.
+    """
     schema = agent.output_schema if isinstance(agent, StructuredAgent) else None
 
     async def _call() -> object:
@@ -88,18 +104,22 @@ async def run_agent[T: BaseModel](
 
     step_result: object = await step.run(step_id, _call)
 
+    est_usd = 0.0
     if isinstance(step_result, dict) and "output" in step_result:
         raw_output: object = step_result["output"]
+        usage = step_result.get("usage")
+        if isinstance(usage, dict):
+            est_usd = float(usage.get("est_usd") or 0.0)
     else:
         raw_output = step_result
 
     if schema is None:
-        return str(raw_output)
+        return str(raw_output), est_usd
     if isinstance(raw_output, schema):
-        return raw_output
+        return raw_output, est_usd
     if isinstance(raw_output, str):
-        return schema.model_validate_json(raw_output)
-    return schema.model_validate(raw_output)
+        return schema.model_validate_json(raw_output), est_usd
+    return schema.model_validate(raw_output), est_usd
 
 
 async def bounded_loop[T: BaseModel](
@@ -114,7 +134,12 @@ async def bounded_loop[T: BaseModel](
     max_usd: float = 0.50,
     article_id: UUID | None = None,
 ) -> list[T | str]:
-    """Execute a bounded multi-step agent loop with hard iteration and USD cost caps."""
+    """Execute a bounded multi-step agent loop with iteration and USD cost caps.
+
+    Each call's estimated cost is added to a running total, and no new iteration
+    starts once the total reaches `max_usd`. The call that crosses the cap still
+    completes, so total spend can exceed `max_usd` by at most one call.
+    """
     outputs: list[T | str] = []
     current_input = initial_input
     accumulated_usd = 0.0
@@ -124,13 +149,8 @@ async def bounded_loop[T: BaseModel](
             break
 
         step_id = f"{step_prefix}-{iteration}"
-        result = await run_agent(
-            step=step,
-            agent=agent,
-            user_input=current_input,
-            step_id=step_id,
-            article_id=article_id,
-        )
+        result, cost_usd = await _run_agent_step(step, agent, current_input, step_id, article_id)
+        accumulated_usd += cost_usd
         outputs.append(result)
 
         stop_decision = should_stop(result, iteration)

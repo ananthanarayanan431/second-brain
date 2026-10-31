@@ -26,23 +26,38 @@ async def check_health() -> dict[str, object]:
 
     try:
         async with httpx.AsyncClient(timeout=3.0) as http_client:
-            await http_client.get(settings.inngest_base_url)
+            response = await http_client.get(settings.inngest_base_url)
+            response.raise_for_status()
         checks["inngest"] = "ok"
     except httpx.HTTPError as exc:
         checks["inngest"] = f"error: {exc}"
 
-    checks["memgraph"] = await check_memgraph_health()
+    try:
+        checks["memgraph"] = await check_memgraph_health()
+    except Exception as exc:  # noqa: BLE001
+        checks["memgraph"] = f"error: {exc}"
 
+    # Counts are only published once every query for that store succeeds, so a
+    # failure partway through leaves them at 0 instead of a partial mix.
     articles = passages = claims = topics = 0
-    if checks.get("database") == "ok":
-        async with get_session() as session:
-            articles = await count_articles(session)
-            passages = await count_passages(session)
-            claims = await count_active_claims(session)
+    if checks["database"] == "ok":
+        try:
+            async with get_session() as session:
+                db_counts = (
+                    await count_articles(session),
+                    await count_passages(session),
+                    await count_active_claims(session),
+                )
+            articles, passages, claims = db_counts
+        except Exception as exc:  # noqa: BLE001
+            checks["database"] = f"error: {exc}"
 
-    if checks.get("memgraph") == "ok":
-        graph_claims, topics = await count_graph_entities()
-        claims = max(claims, graph_claims)
+    if checks["memgraph"] == "ok":
+        try:
+            graph_claims, graph_topics = await count_graph_entities()
+            claims, topics = max(claims, graph_claims), graph_topics
+        except Exception as exc:  # noqa: BLE001
+            checks["memgraph"] = f"error: {exc}"
 
     overall_ok = all(v == "ok" for v in checks.values())
     return {
