@@ -160,10 +160,17 @@ async def hybrid_search(
     # One AsyncSession cannot run two SQL queries at the same time. So we overlap
     # the network call (embedding the question with OpenAI) with the full-text
     # query, and run the vector and graph queries sequentially on the session.
+    # return_exceptions=True: if one call fails, still wait for the other, so the
+    # BM25 query has released the session before the caller's `async with` closes it.
     sparse_results, embedded = await asyncio.gather(
         search_passages_bm25(session, query, candidate_fetch_limit),
         embed_texts([query]),
+        return_exceptions=True,
     )
+    if isinstance(embedded, BaseException):
+        raise embedded
+    if isinstance(sparse_results, BaseException):
+        raise sparse_results
     (query_embedding,) = embedded["embeddings"]
     dense_results = await search_passages_dense(session, query_embedding, candidate_fetch_limit)
     graph_results = await search_graph_claims(session, query, limit=settings.graph_retrieval_limit)
