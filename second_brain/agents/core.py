@@ -15,7 +15,7 @@ from uuid import UUID
 import inngest
 from pydantic import BaseModel
 
-from kb.agents.providers import call_llm
+from second_brain.agents.providers import call_llm
 
 
 @dataclass(frozen=True)
