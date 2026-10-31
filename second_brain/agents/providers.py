@@ -54,6 +54,13 @@ class _Completion:
     output_tokens: int
 
 
+def llm_configured() -> bool:
+    """True when the API key for the configured `LLM_PROVIDER` is set."""
+    if settings.llm_provider == "openrouter":
+        return bool(settings.openrouter_api_key)
+    return bool(settings.anthropic_api_key)
+
+
 # --- Clients (created lazily, one per process) ---
 
 _anthropic_client: anthropic.AsyncAnthropic | None = None

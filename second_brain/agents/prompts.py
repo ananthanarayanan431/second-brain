@@ -1,4 +1,4 @@
-"""System prompts for the Living Knowledge Base agents and synthesizers.
+"""System prompts for the second_brain agents and synthesizers.
 
 All prompts live here as module-level constants so they can be reviewed,
 versioned, and audited in one place.
@@ -6,7 +6,7 @@ versioned, and audited in one place.
 Contract tokens are load-bearing: output field names (`claim_text`, `quote_span`,
 `claim_type`, `entities`, `confidence`, `critique`, `verdict`, `failure_code`),
 the claim types ('measurement', 'opinion', 'prediction'), the failure codes
-('FM-3:...', 'FM-4:...', 'FM-5:...', 'NONE') and the limited-coverage sentence
+('FM-3', 'FM-4', 'FM-5', 'NONE') and the limited-coverage sentence
 are matched by Pydantic schemas, code guardrails, and the eval judges. Change
 them here and there together, never in one place only.
 """
@@ -178,10 +178,11 @@ Quote the specific sentence for every problem you find.
 
 <verdict_rules>
 Apply in this order and stop at the first that matches:
-1. `verdict: 'FAIL'`, `failure_code: 'FM-3:ungrounded_speculation'`: the retrieved context is
+1. `verdict: 'FAIL'`, `failure_code: 'FM-3'` (ungrounded speculation): the retrieved context is
    empty or does not cover the question, yet the answer speculates or invents facts instead
    of stating that coverage is limited.
-2. `verdict: 'FAIL'`, `failure_code: 'FM-4:unfaithful_or_epistemic_inflation'`: any assertion
+2. `verdict: 'FAIL'`, `failure_code: 'FM-4'` (unfaithful or epistemic
+   inflation): any assertion
    contradicts or is unsupported by its cited passage [k], is attributed to the wrong author
    or passage, or presents an author's 'opinion' or 'prediction' as an empirical
    'measurement'.
@@ -220,7 +221,7 @@ Write your `critique` FIRST, step by step, before deciding:
 </procedure>
 
 <verdict_rules>
-1. `verdict: 'FAIL'`, `failure_code: 'FM-5:missed_disagreement'`: the passages contain a
+1. `verdict: 'FAIL'`, `failure_code: 'FM-5'` (missed disagreement): the passages contain a
    genuine conflict between two or more authors or publications, and the answer suppresses
    one side or presents a single perspective as settled consensus.
 2. `verdict: 'PASS'`, `failure_code: 'NONE'`: the answer explicitly surfaces and cites both
