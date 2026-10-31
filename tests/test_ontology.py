@@ -17,6 +17,8 @@ from second_brain.graph.ontology import normalize_author, normalize_topic, norma
         ("processes", "process"),
         ("indexes", "index"),
         ("patches", "patch"),
+        ("sizes", "size"),
+        ("batch sizes", "batch-size"),
         ("caches", "cache"),
         ("embeddings", "embedding"),
         ("AI agents", "ai-agent"),

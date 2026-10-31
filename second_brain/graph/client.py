@@ -244,7 +244,11 @@ async def get_claim_provenance_from_graph(
 async def find_cross_publication_shared_topic_claims(
     limit: int = 25,
 ) -> list[dict[str, Any]]:
-    """Traverse Author 1 -> Article -> Claim -> Topic <- Claim <- Article <- Author 2."""
+    """Active claim pairs from different publications that share a topic.
+
+    Traverses Publication 1 <- Article -> Claim -> Topic <- Claim <- Article -> Publication 2,
+    returning each unordered pair once, in a stable order.
+    """
     return await execute_cypher(
         CROSS_PUBLICATION_DISAGREEMENTS_CYPHER,
         {"limit": limit},

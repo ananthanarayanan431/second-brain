@@ -29,6 +29,17 @@ SET art.article_id = $article_id,
     art.title = $title,
     art.published_at = $published_at,
     art.content_hash = $content_hash
+// Re-sync reflects only the current publication and author: drop edges to any other.
+WITH art, p, au
+OPTIONAL MATCH (art)-[old_pub:PUBLISHED_IN]->(other_pub:Publication)
+WHERE other_pub.slug <> $pub_slug
+WITH art, p, au, collect(old_pub) AS old_pubs
+FOREACH (r IN old_pubs | DELETE r)
+WITH art, p, au
+OPTIONAL MATCH (art)-[old_au:WRITTEN_BY]->(other_au:Author)
+WHERE other_au.slug <> $author_slug
+WITH art, p, au, collect(old_au) AS old_aus
+FOREACH (r IN old_aus | DELETE r)
 MERGE (art)-[:PUBLISHED_IN]->(p)
 MERGE (art)-[:WRITTEN_BY]->(au)
 RETURN art.canonical_id AS canonical_id
@@ -140,12 +151,16 @@ RETURN active_claims, count(DISTINCT t) AS active_topics
 """
 
 CROSS_PUBLICATION_DISAGREEMENTS_CYPHER = """
-MATCH (a1:Author)<-[:WRITTEN_BY]-(art1:Article)-[:ASSERTS]->(c1:Claim)-[:ABOUT]->(t:Topic)
-MATCH (t)<-[:ABOUT]-(c2:Claim)<-[:ASSERTS]-(art2:Article)-[:WRITTEN_BY]->(a2:Author)
+MATCH (p1:Publication)<-[:PUBLISHED_IN]-(art1:Article)-[:ASSERTS]->(c1:Claim)-[:ABOUT]->(t:Topic)
+MATCH (t)<-[:ABOUT]-(c2:Claim)<-[:ASSERTS]-(art2:Article)-[:PUBLISHED_IN]->(p2:Publication)
 WHERE c1.valid_to IS NULL
   AND c2.valid_to IS NULL
-  AND a1.slug <> a2.slug
-RETURN a1.slug AS author_1,
+  AND p1.slug <> p2.slug
+  AND c1.claim_id < c2.claim_id
+OPTIONAL MATCH (art1)-[:WRITTEN_BY]->(a1:Author)
+OPTIONAL MATCH (art2)-[:WRITTEN_BY]->(a2:Author)
+RETURN p1.slug AS publication_1,
+       a1.slug AS author_1,
        art1.canonical_id AS article_1,
        c1.claim_id AS claim_1_id,
        c1.text AS claim_1_text,
@@ -153,6 +168,8 @@ RETURN a1.slug AS author_1,
        c2.claim_id AS claim_2_id,
        c2.text AS claim_2_text,
        art2.canonical_id AS article_2,
-       a2.slug AS author_2
+       a2.slug AS author_2,
+       p2.slug AS publication_2
+ORDER BY shared_topic ASC, claim_1_id ASC, claim_2_id ASC
 LIMIT $limit
 """

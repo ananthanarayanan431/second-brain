@@ -195,8 +195,8 @@ _IRREGULAR_PLURALS: dict[str, str] = {
 def _depluralize_token(token: str) -> str:
     """Singularize a trailing plural on a technical noun where the rule is safe.
 
-    -ies -> -y; -sses/-xes/-zes/-ches/-shes drop "es" (processes, indexes,
-    patches); every other trailing "s" is dropped (databases, responses, agents).
+    -ies -> -y; -sses/-xes/-ches/-shes drop "es" (processes, indexes, patches);
+    every other trailing "s" is dropped (databases, responses, sizes, agents).
     """
     if len(token) <= 3 or token in _SINGULAR_EXCEPTIONS:
         return token
@@ -206,7 +206,7 @@ def _depluralize_token(token: str) -> str:
         return token
     if token.endswith("ies"):
         return token[:-3] + "y"
-    if token.endswith(("sses", "xes", "zes", "ches", "shes")):
+    if token.endswith(("sses", "xes", "ches", "shes")):
         return token[:-2]
     if token.endswith("s"):
         return token[:-1]

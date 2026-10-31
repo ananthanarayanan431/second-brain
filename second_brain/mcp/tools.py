@@ -179,16 +179,17 @@ async def second_brain_job_status(
     run_status: str | None = None
     run_output: object = None
     steps_completed: int = 0
+    response: httpx.Response | None = None
+    inngest_error: httpx.HTTPError | None = None
     try:
         async with httpx.AsyncClient(timeout=5.0) as http_client:
             runs_url = f"{settings.inngest_base_url}/v1/events/{event_id}/runs"
             response = await http_client.get(runs_url)
     except httpx.HTTPError as exc:
-        raise ToolError(
-            f"Could not reach the Inngest Dev Server at {settings.inngest_base_url}: {exc}"
-        ) from exc
+        # Deferred: the local `jobs` row can still answer without Inngest.
+        inngest_error = exc
 
-    if response.status_code == 200:
+    if response is not None and response.status_code == 200:
         runs = response.json().get("data", [])
         if runs:
             run_status = runs[0]["status"]
@@ -199,6 +200,12 @@ async def second_brain_job_status(
     async with get_session() as session:
         job = await get_job_status(session, event_id)
         await session.commit()
+
+    if job is None and inngest_error is not None:
+        raise ToolError(
+            f"Could not reach the Inngest Dev Server at {settings.inngest_base_url}: "
+            f"{inngest_error}"
+        ) from inngest_error
 
     if job is None and run_status is None:
         raise ToolError(
