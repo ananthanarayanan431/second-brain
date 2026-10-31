@@ -38,7 +38,7 @@ export function AppWorkspace() {
       </header>
 
       <main id="main" className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Your second brain</h1>
+        <h1 className="font-serif text-3xl tracking-tight sm:text-4xl">Your Neramind</h1>
         <p className="mt-2 text-muted">
           Ask it anything it has read, search its memory, or teach it something new.
         </p>

@@ -41,7 +41,7 @@ export function AgentToAgent() {
         <StatusBadge status="soon" />
         <div className="mt-4 grid gap-12 lg:grid-cols-2">
           <SectionHeading eyebrow="Agent to agent" title="Busy? Your agent talks to theirs.">
-            When you cannot be in the conversation, your second brain can be. It gets information
+            When you cannot be in the conversation, Neramind can be. It gets information
             and agreements from other people, or from their agents, and reports back. It is
             designed around the open standards emerging for agents that work on someone’s behalf.
           </SectionHeading>

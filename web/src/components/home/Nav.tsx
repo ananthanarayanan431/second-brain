@@ -6,6 +6,7 @@ const LINKS = [
   { href: "#voice", label: "Voice" },
   { href: "#capabilities", label: "Capabilities" },
   { href: "#agents", label: "Agent to agent" },
+  { href: "#name", label: "The name" },
 ];
 
 export function Nav() {

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1300">
+  <g id="AI">
+    <g id="man_with_dark_laptop" data-name="man with dark laptop">
+      <g id="hand_R">
+        <g>
+          <path d="M488.8287,1176.0658c24-21.7021,30.1277-9.0962,52.0851-9.0962,25.5319,0,35.9149-19.5586,35.9149-19.5586,227.9149,76.7921,294.1277-119.4824,294.1277-119.4824l-72.5106-29.8893s-30.4598,145.1575-247.8298,103.4733c-20.4096-3.9139-47.234-32.6809-117.7021,28.5957" style="fill: #fff;"/>
+          <path d="M432.9138,1130.1084c70.4681-61.2766,97.3462-32.78,117.7021-28.5957,212.9808,43.779,247.8298-103.4733,247.8298-103.4733l72.5106,29.8893s-64.8511,184.3335-294.1277,119.4824c0,0-10.383,19.5586-35.9149,19.5586-21.9574,0-28.0851-12.606-52.0851,9.0962" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+          <path d="M445.9351,1149.9382s23.4894-26.5532,46.9787-30.6383" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+          <path d="M461.9351,1166.9697s21.7872-27.2443,43.5745-27.2443" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+        </g>
+        <path d="M892.8828,745.4984c-162.674,71.5207-100.3217,212.2792-150.2269,295.1803-25.1295,41.7445-88.7412,54.0344-170.6834,46.3739l12.1938,82.3069c357.9575,19.847,323.7692-246.2181,329.173-295.8128" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      </g>
+      <g id="body">
+        <path d="M836.0811,907.9127s16.5443,142.9787,33.0213,181.2766c8.1339,18.9058,196.1519,29.4639,265.088-26.451,80.4555-65.2584-54.2943-355.9116-165.1915-330.9958-6.4681,58.7234-72.5106,69.8044-75.4468,19.1235,0,0-49.8114,65.1318-57.471,157.0467Z" style="fill: #fff;"/>
+        <path d="M828.5067,911.4872s-8.4255,114.8936,25.5056,175.5654c10.0459,17.963,211.242,31.6006,280.1782-24.3142,39.0413-31.6669,27.408-118.0069-7.5844-195.6558" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      </g>
+      <g id="hand_L">
+        <g>
+          <path d="M836.0811,1080.1681s40.5106-26.2128,82.1774-10.4573c16.2783,6.1553,38.0687,20.3732,69.3119,24.4785,11.2663,1.4804,25.0213,0,41.3617,0,74.7634,0,58.0827,55.6654-9.1915,54.234-24-.5106-40.6907-1.2227-43.9482-.2742-23.8448,6.9426-43.4408,7.0756-56.462-14.8818-9.6664-16.3002-38.4834-22.7173-55.3344,3.922" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+          <path d="M844.9322,1114.2106s26.0242-29.617,53.7872-15.9664" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+          <path d="M859.145,1029.9553s15.5745,27.5745,59.1136,39.7555" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+        </g>
+        <path d="M967.7065,732.7638c275.1831,16.851,390.5874,443.7446,27.0129,428.4255l1.0212-91.4785c132.766,8.2457,137.8724-79.0747,94.9788-147.5002" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      </g>
+      <g id="head">
+        <path d="M1059.0347,546.0538c62.7677-8.3139,51.5997,76.0689-8.6557,60.0717-10.2128,63.8298-48.9617,83.8803-81.199,92.7553.0658,20.9507,1.3801,33.2924,1.3801,33.2924-29.9203,64.4592-80.0109,52.165-76.9124,22.7947,0,0,1.6-27.8306,2.5031-48.9937-28.4753-8.9975-95.6626-49.0681-75.9374-116.6898,13.9017-47.6578,29.1253-84.679,21.2218-117.0518-14.3718-103.3381,235.0524-139.805,221.7759,60.876" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+        <ellipse cx="971.6671" cy="558.8861" rx="14.4537" ry="11.8727" transform="translate(147.1057 1318.2208) rotate(-72.5486)"/>
+        <ellipse cx="874.8618" cy="541.4363" rx="14.4537" ry="11.8727" transform="translate(124.5858 1245.4407) rotate(-74.9302)"/>
+        <path d="M948.2514,618.1255c-9.1807,13.8055-27.3785,17.3534-46.3333,4.5692" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+        <path d="M855.8258,436.5936s21.1489,51.1507,69.2589,64.3404c61.4645,16.8511,75.6843-7.9628,103.8475-2.5532,22.0794,4.241,33.666,29.9391,30.1025,47.673,6.375-7.1306,42.1036-1.7156,44.4507,27.9015,52.0425-7.8841,62.8085-89.3617,7.6596-120,55.1489-82.2128-115.9149-158.8085-230.3002-94.5466,1.0236-59.6662-103.6572,17.4402-76.0828,88.9295,16.5352,42.8691,57.7021,15.8298,51.0638-11.7447Z" style="stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      </g>
+      <g id="laptop">
+        <polygon points="704.5221 954.0253 751.5153 1155.3987 913.3393 1155.3987 913.3393 1185.3963 756.5202 1185.3963 506.3944 1185.3963 431.7542 1185.3963 379.7561 954.0253 704.5221 954.0253" style="stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      </g>
+    </g>
+    <g id="search">
+      <rect x="169.0173" y="716.934" width="471.8298" height="103.4043" rx="51.7021" ry="51.7021" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      <g>
+        <circle cx="548.9322" cy="767.4872" r="25.3617" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+        <line x1="569.7949" y1="781.9031" x2="591.8258" y2="796.5936" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      </g>
+      <line x1="427.5705" y1="789.2484" x2="480.5067" y2="789.2484" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      <line x1="230.8045" y1="789.2484" x2="376.5066" y2="789.2484" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+    </g>
+    <g id="group_stars" data-name="group stars">
+      <g>
+        <g>
+          <line x1="176.6769" y1="561.1893" x2="176.6769" y2="592.083" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+          <line x1="176.6769" y1="634.7213" x2="176.6769" y2="665.6149" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+        </g>
+        <g>
+          <line x1="228.8897" y1="613.4021" x2="197.996" y2="613.4021" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+          <line x1="155.3577" y1="613.4021" x2="124.4641" y2="613.4021" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+        </g>
+      </g>
+      <g id="star">
+        <g>
+          <line x1="650.1988" y1="122.8309" x2="650.1988" y2="139.5543" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+          <line x1="650.1988" y1="170.6607" x2="650.1988" y2="187.3841" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+        </g>
+        <g>
+          <line x1="682.4718" y1="154.6295" x2="665.7503" y2="154.8772" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+          <line x1="634.6473" y1="155.3379" x2="617.9257" y2="155.5856" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+        </g>
+      </g>
+    </g>
+    <g id="robot_AI" data-name="robot AI">
+      <ellipse cx="623.8134" cy="445.694" rx="39.7929" ry="25.6464" transform="translate(5.0384 898.3571) rotate(-71.7318)" style="stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      <line x1="623.307" y1="442.4184" x2="653.9492" y2="359.212" style="stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      <circle cx="496.3707" cy="408.9047" r="139.1953" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      <ellipse cx="508.1914" cy="417.6908" rx="78.0638" ry="97.706" transform="translate(-33.9673 790.2336) rotate(-73.9121)" style="stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      <ellipse cx="362.2449" cy="366.7138" rx="39.7929" ry="25.6464" transform="translate(-99.5377 595.7491) rotate(-71.7318)" style="stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      <ellipse cx="569.3156" cy="447.7852" rx="22.6677" ry="13.617" transform="translate(-34.362 848.0416) rotate(-71.7318)" style="fill: #fff;"/>
+      <ellipse cx="480.3007" cy="423.1356" rx="22.6677" ry="13.617" transform="translate(-72.0665 746.5903) rotate(-71.7318)" style="fill: #fff;"/>
+      <line x1="362.8092" y1="351.2561" x2="398.6572" y2="270.1563" style="stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+      <ellipse cx="342.5162" cy="360.2012" rx="21.7896" ry="12.8288" transform="translate(-106.8978 572.5436) rotate(-71.7318)" style="fill: #fff; stroke: #000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13px;"/>
+    </g>
+  </g>
+</svg>

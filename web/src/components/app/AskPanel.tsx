@@ -3,6 +3,7 @@
 import { type FormEvent, useState } from "react";
 import { ApiError, api } from "@/lib/api";
 import type { AskResponse } from "@/lib/types";
+import { ART } from "@/components/Illustration";
 import { buttonPrimary, EmptyState, ErrorNote, inputBase, Skeleton } from "@/components/ui";
 import { AnswerView } from "./AnswerView";
 
@@ -42,7 +43,7 @@ export function AskPanel() {
     <div className="space-y-8">
       <form onSubmit={onSubmit} className="space-y-3">
         <label htmlFor="question" className="text-sm font-medium">
-          Ask your second brain
+          Ask Neramind
         </label>
         <textarea
           id="question"
@@ -68,7 +69,7 @@ export function AskPanel() {
 
       <div aria-live="polite">
         {state.kind === "idle" && (
-          <EmptyState title="Ask a question to get started">
+          <EmptyState title="Ask a question to get started" art={ART.ask}>
             <p>Answers come only from what it has read, with a citation for every claim.</p>
             <ul className="mt-4 flex flex-wrap justify-center gap-2">
               {EXAMPLES.map((ex) => (
