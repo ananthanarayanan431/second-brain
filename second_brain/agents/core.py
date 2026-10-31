@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Any, overload
+from typing import overload
 from uuid import UUID
 
 import inngest
@@ -18,22 +18,33 @@ from pydantic import BaseModel
 from second_brain.agents.providers import call_llm
 
 
-@dataclass(frozen=True)
-class Agent[T: BaseModel]:
-    """Declarative specification for a single-purpose agent role."""
+@dataclass(frozen=True, kw_only=True)
+class AgentBase:
+    """Fields shared by every agent role."""
 
     name: str
     role: str
     system_prompt: str
     model: str
-    output_schema: type[T] | None = None
     max_tokens: int = 2048
+
+
+@dataclass(frozen=True, kw_only=True)
+class TextAgent(AgentBase):
+    """Agent whose output is free text."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class StructuredAgent[T: BaseModel](AgentBase):
+    """Agent whose output is validated into the Pydantic model `output_schema`."""
+
+    output_schema: type[T]
 
 
 @overload
 async def run_agent[T: BaseModel](
-    step: inngest.Step | Any,
-    agent: Agent[T],
+    step: inngest.Step,
+    agent: StructuredAgent[T],
     user_input: str,
     step_id: str,
     article_id: UUID | None = None,
@@ -42,17 +53,17 @@ async def run_agent[T: BaseModel](
 
 @overload
 async def run_agent(
-    step: inngest.Step | Any,
-    agent: Agent[Any],
+    step: inngest.Step,
+    agent: TextAgent,
     user_input: str,
     step_id: str,
     article_id: UUID | None = None,
-) -> Any: ...
+) -> str: ...
 
 
 async def run_agent[T: BaseModel](
-    step: inngest.Step | Any,
-    agent: Agent[T],
+    step: inngest.Step,
+    agent: StructuredAgent[T] | TextAgent,
     user_input: str,
     step_id: str,
     article_id: UUID | None = None,
@@ -60,38 +71,40 @@ async def run_agent[T: BaseModel](
     """Execute one LLM call for `agent` inside `step.run(step_id, ...)` so its
     output is durably memoized by Inngest and its token cost is captured by
     `CostCaptureMiddleware`.
-    """
 
-    async def _call() -> dict[str, Any]:
+    A `StructuredAgent[T]` returns a validated `T`; a `TextAgent` returns `str`.
+    """
+    schema = agent.output_schema if isinstance(agent, StructuredAgent) else None
+
+    async def _call() -> object:
         return await call_llm(
             system_prompt=agent.system_prompt,
             user_input=user_input,
             model=agent.model,
             max_tokens=agent.max_tokens,
-            output_schema=agent.output_schema,
+            output_schema=schema,
             article_id=article_id,
         )
 
-    step_result: Any = await step.run(step_id, _call)
+    step_result: object = await step.run(step_id, _call)
 
     if isinstance(step_result, dict) and "output" in step_result:
-        raw_output = step_result["output"]
+        raw_output: object = step_result["output"]
     else:
         raw_output = step_result
 
-    if agent.output_schema is not None:
-        if isinstance(raw_output, agent.output_schema):
-            return raw_output
-        if isinstance(raw_output, str):
-            return agent.output_schema.model_validate_json(raw_output)
-        return agent.output_schema.model_validate(raw_output)
-
-    return str(raw_output)
+    if schema is None:
+        return str(raw_output)
+    if isinstance(raw_output, schema):
+        return raw_output
+    if isinstance(raw_output, str):
+        return schema.model_validate_json(raw_output)
+    return schema.model_validate(raw_output)
 
 
 async def bounded_loop[T: BaseModel](
     step: inngest.Step,
-    agent: Agent[T],
+    agent: StructuredAgent[T] | TextAgent,
     initial_input: str,
     *,
     step_prefix: str,
