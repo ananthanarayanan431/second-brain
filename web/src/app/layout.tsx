@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Inter, JetBrains_Mono, Newsreader } from "next/font/google";
 import "./globals.css";
 
-const display = Space_Grotesk({ variable: "--font-display", subsets: ["latin"] });
+const display = Inter({ variable: "--font-display", subsets: ["latin"] });
+const heading = Newsreader({ variable: "--font-heading", subsets: ["latin"] });
 const code = JetBrains_Mono({ variable: "--font-code", subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${display.variable} ${code.variable} h-full antialiased`}>
+    <html lang="en" className={`${display.variable} ${heading.variable} ${code.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col font-sans">{children}</body>
     </html>
   );

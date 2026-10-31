@@ -1,0 +1,72 @@
+{
+  "version": 2,
+  "illustrations": {
+    "style": "notion-line-art",
+    "slots": {
+      "hero": {
+        "id": "6abd04f2ab474b9579d4fe0a",
+        "heading": "AI assistant robot supporting office worker productivity",
+        "file": "public/illustrations/hero.svg",
+        "width": 1600,
+        "height": 1900,
+        "free_distribution": false
+      },
+      "yours": {
+        "id": "6a744b80a6569e563cb70426",
+        "heading": "Mindfulness character practicing gratitude hands crossed over heart",
+        "file": "public/illustrations/yours.svg",
+        "width": 900,
+        "height": 900,
+        "free_distribution": false
+      },
+      "memory": {
+        "id": "6a46393f8b96cd7ccc5e9471",
+        "heading": "Reading person absorbed in story holding book with curiosity",
+        "file": "public/illustrations/memory.svg",
+        "width": 800,
+        "height": 800,
+        "free_distribution": false
+      },
+      "acts": {
+        "id": "6a3cf42bcb69f88666f83ae5",
+        "heading": "Mascot person smiling with outstretched arm ready for product presentation",
+        "file": "public/illustrations/acts.svg",
+        "width": 900,
+        "height": 1800,
+        "free_distribution": false
+      },
+      "grow": {
+        "id": "6acf41bc14b04052295d066e",
+        "heading": "Confident runner moving upward on blocks towards future success",
+        "file": "public/illustrations/grow.svg",
+        "width": 1500,
+        "height": 1900,
+        "free_distribution": false
+      },
+      "ask": {
+        "id": "6a6356fd9a3070927cf42245",
+        "heading": "Laptop user interacting with ai chatbot and online search interface",
+        "file": "public/illustrations/ask.svg",
+        "width": 1400,
+        "height": 1300,
+        "free_distribution": false
+      },
+      "search": {
+        "id": "6a3cf1961b307df7ed5a38e3",
+        "heading": "Laptop user holding magnifying glass searching data and information",
+        "file": "public/illustrations/search.svg",
+        "width": 1100,
+        "height": 1100,
+        "free_distribution": false
+      },
+      "no-results": {
+        "id": "6a881eb55f8ed3d82571a798",
+        "heading": "Question marks surrounding thoughtful character resting elbows on table surface",
+        "file": "public/illustrations/no-results.svg",
+        "width": 1000,
+        "height": 1000,
+        "free_distribution": false
+      }
+    }
+  }
+}

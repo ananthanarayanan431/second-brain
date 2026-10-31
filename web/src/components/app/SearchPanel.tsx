@@ -3,6 +3,7 @@
 import { type FormEvent, useState } from "react";
 import { ApiError, api } from "@/lib/api";
 import type { SearchMode, SearchResult } from "@/lib/types";
+import { ART } from "@/components/Illustration";
 import { buttonPrimary, EmptyState, ErrorNote, inputBase, Skeleton } from "@/components/ui";
 
 const MODES: { id: SearchMode; label: string; hint: string }[] = [
@@ -104,7 +105,7 @@ export function SearchPanel() {
 
       <div aria-live="polite">
         {state.kind === "idle" && (
-          <EmptyState title="Search everything your second brain has read">
+          <EmptyState title="Search everything your second brain has read" art={ART.search}>
             Compare modes on the same query to see what each one finds.
           </EmptyState>
         )}
@@ -112,7 +113,7 @@ export function SearchPanel() {
         {state.kind === "error" && <ErrorNote message={state.message} />}
         {state.kind === "done" &&
           (state.results.length === 0 ? (
-            <EmptyState title={`Nothing found for “${state.query}”`}>
+            <EmptyState title={`Nothing found for “${state.query}”`} art={ART.noResults}>
               Try different words, or teach it a source that covers this topic.
             </EmptyState>
           ) : (

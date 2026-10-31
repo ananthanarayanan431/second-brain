@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Illustration } from "@/components/Illustration";
 
 export function SectionHeading({
   eyebrow,
@@ -12,7 +13,7 @@ export function SectionHeading({
   return (
     <div className="max-w-2xl">
       <p className="font-mono text-xs uppercase tracking-widest text-accent">{eyebrow}</p>
-      <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h2>
+      <h2 className="mt-3 font-serif text-4xl leading-tight tracking-tight sm:text-5xl">{title}</h2>
       {children && <p className="mt-4 text-lg text-muted">{children}</p>}
     </div>
   );
@@ -27,10 +28,13 @@ export function ErrorNote({ message }: { message: string }) {
   );
 }
 
-export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {
+type Art = { src: string; width: number; height: number };
+
+export function EmptyState({ title, art, children }: { title: string; art?: Art; children?: ReactNode }) {
   return (
-    <div role="status" className="rounded-md border border-dashed border-line p-8 text-center">
-      <p className="font-medium">{title}</p>
+    <div role="status" className="rounded-lg border border-line bg-panel p-8 text-center">
+      {art && <Illustration {...art} box={150} className="mb-5" />}
+      <p className="font-serif text-xl">{title}</p>
       {children && <div className="mt-2 text-sm text-muted">{children}</div>}
     </div>
   );
