@@ -53,6 +53,11 @@ SET c.article_id = claim.article_id,
     c.confidence = claim.confidence,
     c.valid_to = claim.valid_to
 MERGE (art)-[:ASSERTS]->(c)
+// Drop the claim's previous topic links so a re-sync reflects only its current topics.
+WITH art, c, claim
+OPTIONAL MATCH (c)-[old_about:ABOUT]->(:Topic)
+WITH art, c, claim, collect(old_about) AS old_abouts
+FOREACH (r IN old_abouts | DELETE r)
 FOREACH (topic IN claim.topics |
     MERGE (t:Topic {slug: topic.slug})
     ON CREATE SET t.name = topic.name
@@ -122,7 +127,7 @@ RETURN c.claim_id AS claim_id,
        pub.slug AS publication_slug,
        pub.name AS publication_name,
        pub.homepage AS publication_homepage,
-       collect(DISTINCT {slug: t.slug, name: t.name}) AS topics
+       [topic IN collect(DISTINCT t) | {slug: topic.slug, name: topic.name}] AS topics
 """
 
 COUNT_ACTIVE_CLAIMS_AND_TOPICS_CYPHER = """

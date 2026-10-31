@@ -1,10 +1,11 @@
-"""The nine MCP tools (weeks 3–4).
+"""The ten MCP tools (weeks 3–4).
 
-Fast reads (`kb_health`, `kb_search`, `kb_ask`, `kb_list_publications`,
-`kb_job_status`, `kb_sources`) hit Postgres, Memgraph, and retrieval engines
-directly and return in under a second — no Inngest run is created for them.
-Slow work (`kb_add_publication`, `kb_backfill`, `kb_sync`) sends an event to
-Inngest and returns a handle immediately; progress is polled with `kb_job_status`.
+Fast reads (`second_brain_health`, `second_brain_search`, `second_brain_ask`,
+`second_brain_list_publications`, `second_brain_job_status`, `second_brain_sources`)
+hit Postgres, Memgraph, and retrieval engines directly and return in under a
+second — no Inngest run is created for them. Slow work (`second_brain_add_publication`,
+`second_brain_backfill`, `second_brain_sync`) sends an event to Inngest and returns a
+handle immediately; progress is polled with `second_brain_job_status`.
 """
 
 from __future__ import annotations
@@ -17,23 +18,23 @@ import inngest
 from mcp.server.mcpserver.exceptions import ToolError
 from pydantic import Field
 
-from kb.config import settings
-from kb.db.queries import (
+from second_brain.config import settings
+from second_brain.db.repositories import (
     get_job_status,
     get_latest_eval_report,
     get_source_provenance,
     list_publications_with_stats,
 )
-from kb.db.session import get_session
-from kb.functions.ask import ask_question
-from kb.health import check_health
-from kb.inngest_client import client
-from kb.retrieval import hybrid
-from kb.schemas.events import PUBLICATION_ADDED, PublicationAdded
-from kb.sources.allowlist import load_publications
+from second_brain.db.session import get_session
+from second_brain.functions.ask import ask_question
+from second_brain.health import check_health
+from second_brain.inngest_client import client
+from second_brain.retrieval import hybrid
+from second_brain.schemas.events import PUBLICATION_ADDED, PublicationAdded
+from second_brain.sources.allowlist import load_publications
 
 
-async def kb_health() -> dict[str, object]:
+async def second_brain_health() -> dict[str, object]:
     """Check whether Postgres, the Inngest Dev Server, and Memgraph are reachable.
 
     Returns article, passage, active claim, and topic counts alongside per-subsystem
@@ -43,7 +44,7 @@ async def kb_health() -> dict[str, object]:
     return await check_health()
 
 
-async def kb_add_publication(
+async def second_brain_add_publication(
     feed_url: typing.Annotated[
         str,
         Field(description="The publication's RSS feed URL, e.g. https://example.substack.com/feed"),
@@ -56,7 +57,7 @@ async def kb_add_publication(
     anything outside it rather than silently ingesting an unapproved source.
 
     Returns immediately with `{event_id, trace_url, status}`; it does not wait
-    for ingestion to finish. Poll `kb_job_status(event_id)` with the returned
+    for ingestion to finish. Poll `second_brain_job_status(event_id)` with the returned
     `event_id` to see progress, and use `trace_url` to inspect the run in the
     Inngest Dev Server UI.
     """
@@ -71,7 +72,7 @@ async def kb_add_publication(
     }
 
 
-async def kb_search(
+async def second_brain_search(
     query: typing.Annotated[
         str, Field(description="Free-text search query, e.g. 'agentic RAG evals'")
     ],
@@ -98,7 +99,7 @@ async def kb_search(
     return {"results": formatted}
 
 
-async def kb_ask(
+async def second_brain_ask(
     question: typing.Annotated[
         str, Field(description="Technical question to answer from the knowledge base")
     ],
@@ -115,15 +116,12 @@ async def kb_ask(
         return await ask_question(session, question=question)
 
 
-
-async def kb_backfill(
+async def second_brain_backfill(
     publication: typing.Annotated[
         str,
         Field(
             default="all",
-            description=(
-                "Publication slug, feed URL, or 'all' to backfill all publications"
-            ),
+            description=("Publication slug, feed URL, or 'all' to backfill all publications"),
         ),
     ] = "all",
 ) -> dict[str, object]:
@@ -161,9 +159,14 @@ async def kb_backfill(
     }
 
 
-async def kb_job_status(
+async def second_brain_job_status(
     event_id: typing.Annotated[
-        str, Field(description="The event_id returned by kb_add_publication or kb_backfill")
+        str,
+        Field(
+            description=(
+                "The event_id returned by second_brain_add_publication or second_brain_backfill"
+            )
+        ),
     ],
 ) -> dict[str, object]:
     """Check progress of a publication ingestion or backfill job.
@@ -200,7 +203,8 @@ async def kb_job_status(
     if job is None and run_status is None:
         raise ToolError(
             f"No job or Inngest run found for event_id={event_id!r}. "
-            "Check that it's the id returned by kb_add_publication or kb_backfill."
+            "Check that it's the id returned by second_brain_add_publication "
+            "or second_brain_backfill."
         )
 
     return {
@@ -215,14 +219,14 @@ async def kb_job_status(
     }
 
 
-async def kb_list_publications() -> dict[str, object]:
+async def second_brain_list_publications() -> dict[str, object]:
     """List all publications in the knowledge base alongside article counts and sync metadata."""
     async with get_session() as session:
         pubs = await list_publications_with_stats(session)
     return {"publications": pubs}
 
 
-async def kb_sync(
+async def second_brain_sync(
     publication: typing.Annotated[
         str | None,
         Field(
@@ -233,11 +237,11 @@ async def kb_sync(
 ) -> dict[str, object]:
     """Force an immediate freshness poll instead of waiting for the 5-minute cron.
 
-    Dispatches `kb/feed.poll` to Inngest to check HTTP conditional headers
+    Dispatches `second-brain/feed.poll` to Inngest to check HTTP conditional headers
     (ETag / Last-Modified) against origins and discover new articles immediately.
     """
     event = inngest.Event(
-        name="kb/feed.poll",
+        name="second-brain/feed.poll",
         data={"publication": publication} if publication else {},
     )
     event_ids = await client.send(event)
@@ -249,22 +253,22 @@ async def kb_sync(
     }
 
 
-async def kb_sources(
+async def second_brain_sources(
     claim_or_passage_id: typing.Annotated[
         str,
         Field(
             description=(
                 "UUID of a cited claim (`claim_id`) or passage (`passage_id`) "
-                "returned by kb_ask or kb_search"
+                "returned by second_brain_ask or second_brain_search"
             )
         ),
     ],
 ) -> dict[str, object]:
     """Inspect full provenance, verbatim quote, and temporal validity for a cited claim or passage.
 
-    When to use `kb_sources` vs `kb_search`:
-    - Use `kb_search` to discover relevant passages by free-text query.
-    - Use `kb_sources` when you already have a specific `claim_id` or `passage_id`
+    When to use `second_brain_sources` vs `second_brain_search`:
+    - Use `second_brain_search` to discover relevant passages by free-text query.
+    - Use `second_brain_sources` when you already have a specific `claim_id` or `passage_id`
       from a citation and want to verify its exact verbatim quote (`quote_span` or
       passage text), author, publication, epistemic `claim_type` (`opinion`,
       `measurement`, `prediction`), canonical topics, and temporal validity
@@ -273,9 +277,7 @@ async def kb_sources(
     try:
         target_uuid = uuid.UUID(claim_or_passage_id.strip())
     except ValueError as exc:
-        raise ToolError(
-            f"Invalid UUID for claim_or_passage_id={claim_or_passage_id!r}."
-        ) from exc
+        raise ToolError(f"Invalid UUID for claim_or_passage_id={claim_or_passage_id!r}.") from exc
 
     async with get_session() as session:
         provenance = await get_source_provenance(session, target_uuid)
@@ -287,7 +289,7 @@ async def kb_sources(
     return provenance
 
 
-async def kb_eval_report(
+async def second_brain_eval_report(
     limit: typing.Annotated[
         int,
         Field(

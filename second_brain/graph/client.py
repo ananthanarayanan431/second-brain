@@ -1,8 +1,6 @@
 """Memgraph async Bolt client, schema initialization, and graph operations.
 
-Uses `neo4j.AsyncGraphDatabase` when installed, with automatic fallback to
-`kb.graph._bolt.FallbackBoltDriver` so parameterized Cypher works against
-Memgraph even in environments where `neo4j` has not yet been synced into `.venv`.
+Uses the `neo4j` driver (a pinned dependency), which speaks Bolt to Memgraph.
 """
 
 from __future__ import annotations
@@ -10,9 +8,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from kb.config import settings
-from kb.graph._bolt import FallbackBoltDriver
-from kb.graph.cypher import (
+from neo4j import AsyncDriver, AsyncGraphDatabase
+
+from second_brain.config import settings
+from second_brain.graph.cypher import (
     COUNT_ACTIVE_CLAIMS_AND_TOPICS_CYPHER,
     CROSS_PUBLICATION_DISAGREEMENTS_CYPHER,
     GET_CLAIM_PROVENANCE_CYPHER,
@@ -23,14 +22,9 @@ from kb.graph.cypher import (
     SUPERSEDE_ARTICLE_CLAIMS_CYPHER,
 )
 
-try:
-    from neo4j import AsyncGraphDatabase
-except ImportError:  # pragma: no cover
-    AsyncGraphDatabase = None  # type: ignore[misc,assignment]
-
 logger = logging.getLogger(__name__)
 
-_driver: Any = None
+_driver: AsyncDriver | None = None
 _schema_initialized: bool = False
 
 SCHEMA_DDL_STATEMENTS: tuple[str, ...] = (
@@ -51,19 +45,18 @@ SCHEMA_DDL_STATEMENTS: tuple[str, ...] = (
 )
 
 
-def get_graph_driver() -> Any:
+def get_graph_driver() -> AsyncDriver:
     """Return the singleton async Bolt driver for Memgraph."""
     global _driver
     if _driver is None:
-        auth = (settings.memgraph_user, settings.memgraph_password)
-        if AsyncGraphDatabase is not None:
-            _driver = AsyncGraphDatabase.driver(settings.memgraph_uri, auth=auth)
-        else:
-            _driver = FallbackBoltDriver(settings.memgraph_uri, auth=auth)
+        auth = (
+            (settings.memgraph_user, settings.memgraph_password) if settings.memgraph_user else None
+        )
+        _driver = AsyncGraphDatabase.driver(settings.memgraph_uri, auth=auth)
     return _driver
 
 
-def set_graph_driver(driver: Any) -> None:
+def set_graph_driver(driver: AsyncDriver | None) -> None:
     """Override the singleton graph driver (used by tests)."""
     global _driver, _schema_initialized
     _driver = driver
@@ -83,27 +76,36 @@ async def execute_cypher(
     query: str, parameters: dict[str, Any] | None = None
 ) -> list[dict[str, Any]]:
     """Execute a parameterized Cypher query and return rows as a list of dicts."""
-    driver = get_graph_driver()
-    async with driver.session() as session:
+    async with get_graph_driver().session() as session:
         result = await session.run(query, parameters or {})
         return list(await result.data())
 
 
+def _is_already_exists_error(exc: Exception) -> bool:
+    return "already exist" in str(exc).lower()
+
+
 async def ensure_graph_schema() -> None:
-    """Idempotently ensure Memgraph indexes and uniqueness constraints exist."""
+    """Idempotently ensure Memgraph indexes and uniqueness constraints exist.
+
+    "Already exists" errors count as success. Any other failure is logged as a
+    warning and leaves the schema marked uninitialized, so the next call retries.
+    """
     global _schema_initialized
     if _schema_initialized:
         return
-    driver = get_graph_driver()
-    async with driver.session() as session:
+    failures = 0
+    async with get_graph_driver().session() as session:
         for stmt in SCHEMA_DDL_STATEMENTS:
             try:
-                res = await session.run(stmt)
-                await res.data()
-            except Exception as exc:
-                # Memgraph may report an error if a constraint/index already exists
-                logger.debug("Memgraph schema statement skipped (%s): %s", stmt, exc)
-    _schema_initialized = True
+                result = await session.run(stmt)
+                await result.consume()
+            except Exception as exc:  # noqa: BLE001 - reported per statement, retried later
+                if _is_already_exists_error(exc):
+                    continue
+                failures += 1
+                logger.warning("Memgraph schema statement failed (%s): %s", stmt, exc)
+    _schema_initialized = failures == 0
 
 
 async def check_memgraph_health() -> str:
@@ -175,9 +177,7 @@ async def sync_article_claims_to_graph(
             "now": now_iso,
         },
     )
-    superseded_count = (
-        int(superseded_rows[0].get("superseded_count", 0)) if superseded_rows else 0
-    )
+    superseded_count = int(superseded_rows[0].get("superseded_count", 0)) if superseded_rows else 0
 
     synced_claims = 0
     if claims:
@@ -189,9 +189,7 @@ async def sync_article_claims_to_graph(
             },
         )
         synced_claims = (
-            int(batch_rows[0].get("synced_claims", len(claims)))
-            if batch_rows
-            else len(claims)
+            int(batch_rows[0].get("synced_claims", len(claims))) if batch_rows else len(claims)
         )
 
     supersedes_edges = 0

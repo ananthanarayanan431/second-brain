@@ -1,4 +1,4 @@
-"""`kb-mcp` entrypoint. stdio transport; `--http` is accepted but unused this
+"""`second-brain-mcp` entrypoint. stdio transport; `--http` is accepted but unused this
 week (task 1.5 — HTTP + auth lands in week 6, task 6.5).
 """
 
@@ -9,83 +9,83 @@ import argparse
 from mcp.server.mcpserver import MCPServer
 from mcp_types import ToolAnnotations
 
-from kb.mcp import tools
+from second_brain.mcp import tools
 
 mcp = MCPServer(
-    name="substack-brain",
+    name="second-brain",
     instructions=(
         "Query and grow a knowledge base built from technical newsletters. "
-        "Prefer kb_search and kb_ask over generic web search for anything about a "
-        "covered publication. Tools that trigger work (kb_add_publication, kb_backfill, "
-        "kb_sync) return a handle immediately; poll kb_job_status for progress."
+        "Prefer second_brain_search and second_brain_ask over generic web search "
+        "for anything about a covered publication. Tools that trigger work "
+        "(second_brain_add_publication, second_brain_backfill, second_brain_sync) "
+        "return a handle immediately; poll second_brain_job_status for progress."
     ),
 )
 
 mcp.add_tool(
-    tools.kb_health,
+    tools.second_brain_health,
     annotations=ToolAnnotations(
         read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=False
     ),
 )
 mcp.add_tool(
-    tools.kb_add_publication,
+    tools.second_brain_add_publication,
     annotations=ToolAnnotations(
         read_only_hint=False, destructive_hint=False, idempotent_hint=True, open_world_hint=False
     ),
 )
 mcp.add_tool(
-    tools.kb_search,
+    tools.second_brain_search,
     annotations=ToolAnnotations(
         read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=False
     ),
 )
 mcp.add_tool(
-    tools.kb_ask,
+    tools.second_brain_ask,
     annotations=ToolAnnotations(
         read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=False
     ),
 )
 mcp.add_tool(
-    tools.kb_backfill,
+    tools.second_brain_backfill,
     annotations=ToolAnnotations(
         read_only_hint=False, destructive_hint=False, idempotent_hint=True, open_world_hint=False
     ),
 )
 mcp.add_tool(
-    tools.kb_job_status,
+    tools.second_brain_job_status,
     annotations=ToolAnnotations(
         read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=False
     ),
 )
 mcp.add_tool(
-    tools.kb_list_publications,
+    tools.second_brain_list_publications,
     annotations=ToolAnnotations(
         read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=False
     ),
 )
 mcp.add_tool(
-    tools.kb_sync,
+    tools.second_brain_sync,
     annotations=ToolAnnotations(
         read_only_hint=False, destructive_hint=False, idempotent_hint=True, open_world_hint=False
     ),
 )
 mcp.add_tool(
-    tools.kb_sources,
+    tools.second_brain_sources,
     annotations=ToolAnnotations(
         read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=False
     ),
 )
 mcp.add_tool(
-    tools.kb_eval_report,
+    tools.second_brain_eval_report,
     annotations=ToolAnnotations(
         read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=False
     ),
 )
-
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="kb-mcp")
+    parser = argparse.ArgumentParser(prog="second-brain-mcp")
     parser.add_argument(
         "--http",
         action="store_true",

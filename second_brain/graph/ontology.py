@@ -15,11 +15,9 @@ import unicodedata
 
 from pydantic import BaseModel, Field
 
-from kb.schemas.entities import ClaimType, ExtractedTopic
+from second_brain.schemas.entities import ClaimType, ExtractedTopic
 
-NODE_LABELS: frozenset[str] = frozenset(
-    {"Publication", "Author", "Article", "Claim", "Topic"}
-)
+NODE_LABELS: frozenset[str] = frozenset({"Publication", "Author", "Article", "Claim", "Topic"})
 
 EDGE_TYPES: frozenset[str] = frozenset(
     {"PUBLISHED_IN", "WRITTEN_BY", "ASSERTS", "ABOUT", "SUPERSEDES"}
@@ -170,25 +168,47 @@ _SINGULAR_EXCEPTIONS: frozenset[str] = frozenset(
         "bias",
         "pass",
         "class",
+        "kubernetes",
+        "series",
+        "species",
+        "macos",
+        "kudos",
+        "chaos",
     }
 )
 
+# Plurals the suffix rules below would get wrong.
+_IRREGULAR_PLURALS: dict[str, str] = {
+    "analyses": "analysis",
+    "hypotheses": "hypothesis",
+    "indices": "index",
+    "matrices": "matrix",
+    "vertices": "vertex",
+    "biases": "bias",
+    "aliases": "alias",
+    "statuses": "status",
+    "caches": "cache",
+    "apis": "api",
+}
+
 
 def _depluralize_token(token: str) -> str:
-    """De-pluralize simple trailing 's' on technical nouns where safe."""
+    """Singularize a trailing plural on a technical noun where the rule is safe.
+
+    -ies -> -y; -sses/-xes/-zes/-ches/-shes drop "es" (processes, indexes,
+    patches); every other trailing "s" is dropped (databases, responses, agents).
+    """
     if len(token) <= 3 or token in _SINGULAR_EXCEPTIONS:
         return token
-    if token.endswith(("ss", "us", "is", "as", "os", "ics")):
+    if token in _IRREGULAR_PLURALS:
+        return _IRREGULAR_PLURALS[token]
+    if token.endswith(("ss", "us", "is", "as", "ics")):
         return token
-    if token.endswith("ies") and len(token) > 4:
+    if token.endswith("ies"):
         return token[:-3] + "y"
-    if token.endswith("s") and not token.endswith("es"):
-        return token[:-1]
-    if (
-        token.endswith("es")
-        and len(token) > 4
-        and not token.endswith(("ses", "xes", "zes", "ches", "shes"))
-    ):
+    if token.endswith(("sses", "xes", "zes", "ches", "shes")):
+        return token[:-2]
+    if token.endswith("s"):
         return token[:-1]
     return token
 
