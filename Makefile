@@ -1,7 +1,8 @@
 .DEFAULT_GOAL := help
-.PHONY: help install start services app stop logs reset nuke db-clear \
+.PHONY: help install hooks start services app stop logs reset nuke db-clear \
 	migrate migration downgrade db-current mcp calibrate replay \
-	format lint test check
+	format lint test check web-install web web-build web-check \
+	ui adminer inngest-ui memgraph-ui api-docs
 
 -include .env
 export
@@ -15,8 +16,11 @@ LAB_PORT ?= 8000
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-install: ## Install dependencies (uv sync)
+install: hooks ## Install dependencies (uv sync) and enable git hooks
 	uv sync
+
+hooks: ## Enable the repo's git hooks (blocks direct pushes to main)
+	git config core.hooksPath .githooks
 
 # --- Running ---------------------------------------------------------------
 
@@ -91,6 +95,48 @@ calibrate: ## Calibrate the LLM judges: make calibrate MODE=live (default offlin
 
 replay: ## Replay backfill: make replay ARGS="--verify" (or --all, --slug <slug>)
 	uv run python scripts/replay_backfill.py $(or $(ARGS),--verify)
+
+# --- Web (Next.js, in web/) -------------------------------------------------
+
+web-install: ## Install the web app's dependencies (pnpm)
+	pnpm --dir web install
+
+web: ## Run the web app on http://localhost:3001 (needs `make app` for the API)
+	pnpm --dir web dev
+
+web-build: ## Production build of the web app
+	pnpm --dir web build
+
+web-check: ## Type-check and lint the web app
+	pnpm --dir web typecheck
+	pnpm --dir web lint
+
+# --- Browser UIs -----------------------------------------------------------
+# Each target starts its container if needed, waits until it is ready, then
+# opens the page. OPEN is `open` on macOS and `xdg-open` on Linux.
+
+OPEN ?= $(shell command -v open || command -v xdg-open)
+
+ui: adminer inngest-ui memgraph-ui ## Open Adminer, Inngest, and Memgraph Lab
+
+# The URL preselects the PostgreSQL driver and the `postgres` server, which
+# Adminer cannot default to by env var, so only the password is left to type.
+adminer: ## Open Adminer (Postgres UI) on http://localhost:8081
+	@$(COMPOSE) up -d --wait adminer
+	@echo "Adminer: password is POSTGRES_PASSWORD from .env (default: second_brain_pw)"
+	@$(OPEN) "http://localhost:8081/?pgsql=postgres&username=$${POSTGRES_USER:-second_brain}&db=$${POSTGRES_DB:-second_brain}"
+
+inngest-ui: ## Open the Inngest dev server dashboard on http://localhost:8288
+	@$(COMPOSE) up -d --wait inngest-dev
+	@$(OPEN) "http://localhost:8288"
+
+memgraph-ui: ## Open Memgraph Lab (graph UI) on http://localhost:3000
+	@$(COMPOSE) up -d --wait memgraph-lab
+	@$(OPEN) "http://localhost:3000"
+
+api-docs: ## Open the FastAPI docs on LAB_PORT (needs `make app` running)
+	@curl -sf -o /dev/null "http://localhost:$(LAB_PORT)/docs" || { echo "The API is not running on :$(LAB_PORT). Start it with 'make app'."; exit 1; }
+	@$(OPEN) "http://localhost:$(LAB_PORT)/docs"
 
 # --- Quality ---------------------------------------------------------------
 

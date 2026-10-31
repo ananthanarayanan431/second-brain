@@ -51,6 +51,15 @@ git rev-list --count origin/<base>..HEAD    # must be > 0
 
 If the count is 0, stop: there are no commits to raise a PR for.
 
+Then make sure the branch does not track the base branch. A branch created with
+`git switch -c <name> origin/<base>` tracks `origin/<base>`, and any plain `git push`
+or editor "Sync" then pushes straight to the base:
+
+```bash
+git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null   # must not be origin/<base>
+git branch --unset-upstream                                          # run only if it is
+```
+
 ## Step 2: Check for an existing PR
 
 ```bash
@@ -169,17 +178,24 @@ Ask the user to approve, or to tell you what to edit. Apply edits, re-run Step 6
 
 ## Step 8: Push and create the PR
 
+Always name the destination branch explicitly, so the push can only create or
+update the branch with the same name:
+
 ```bash
-git push -u origin HEAD
+BRANCH="$(git branch --show-current)"
+git push -u origin "HEAD:refs/heads/$BRANCH"
 gh pr create --base <base> --title "<title>" --body-file "$BODY_FILE"    # add --draft if requested
 ```
 
 When updating an existing PR (Step 2) instead:
 
 ```bash
-git push
+git push origin "HEAD:refs/heads/$(git branch --show-current)"
 gh pr edit <number> --title "<title>" --body-file "$BODY_FILE"
 ```
+
+After pushing, confirm the base did not move: `git fetch origin <base>` and check that
+`git rev-list --count origin/<base>..HEAD` is still greater than 0.
 
 If the push is rejected (for example the remote branch has diverged), stop and explain. Do not force-push unless the user explicitly asks. If the `pre-push` hook rejects it, read the message and fix the cause.
 

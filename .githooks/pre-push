@@ -1,0 +1,23 @@
+#!/bin/sh
+# Refuse pushes that update main directly: changes reach main through pull
+# requests. Git runs this for every push from this clone, whether it comes
+# from the terminal, an editor, or an agent.
+#
+# Deliberate push to main (for example a rollback):
+#   ALLOW_PUSH_TO_MAIN=1 git push ...
+#
+# Enabled by `make hooks` (git config core.hooksPath .githooks).
+
+protected="refs/heads/main"
+
+while read -r local_ref _local_sha remote_ref _remote_sha; do
+	if [ "$remote_ref" = "$protected" ] && [ "${ALLOW_PUSH_TO_MAIN:-}" != "1" ]; then
+		echo "pre-push: refusing to push to main ($local_ref -> $remote_ref)." >&2
+		echo "  Push your branch and open a pull request instead:" >&2
+		echo "    git push -u origin HEAD:refs/heads/\$(git branch --show-current)" >&2
+		echo "  Deliberate push to main? Re-run with ALLOW_PUSH_TO_MAIN=1." >&2
+		exit 1
+	fi
+done
+
+exit 0
