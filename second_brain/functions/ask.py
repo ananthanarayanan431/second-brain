@@ -127,7 +127,8 @@ async def ask_question(
 
     # 2. Answer with the configured LLM, citing passages as [1], [2], ...
     if not top_passages:
-        answer_text = "No relevant passages were found in the second brain for this question."
+        # Must keep "No relevant passages were found": evals/deterministic.py matches it.
+        answer_text = "No relevant passages were found in Neramind's memory for this question."
         citations: list[dict[str, Any]] = []
     elif not llm_configured():
         answer_text = (

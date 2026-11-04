@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Illustration } from "@/components/Illustration";
+import { type ArtSource, Illustration } from "@/components/Illustration";
 
 export function SectionHeading({
   eyebrow,
@@ -28,9 +28,7 @@ export function ErrorNote({ message }: { message: string }) {
   );
 }
 
-type Art = { src: string; width: number; height: number };
-
-export function EmptyState({ title, art, children }: { title: string; art?: Art; children?: ReactNode }) {
+export function EmptyState({ title, art, children }: { title: string; art?: ArtSource; children?: ReactNode }) {
   return (
     <div role="status" className="rounded-lg border border-line bg-panel p-8 text-center">
       {art && <Illustration {...art} box={150} className="mb-5" />}
