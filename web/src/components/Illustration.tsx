@@ -12,7 +12,7 @@ export function Illustration({
   height,
   box,
   className = "",
-  priority = false,
+  preload = false,
 }: {
   /** Path under /public, e.g. "/illustrations/hero.svg". */
   src: string;
@@ -22,7 +22,8 @@ export function Illustration({
   /** Box height in px. The artwork is scaled to fit inside it. */
   box: number;
   className?: string;
-  priority?: boolean;
+  /** Load early: set only on the above-the-fold image (the hero). */
+  preload?: boolean;
 }) {
   return (
     <div className={`grid place-items-center ${className}`} style={{ height: box }}>
@@ -31,12 +32,15 @@ export function Illustration({
         alt=""
         width={width}
         height={height}
-        priority={priority}
+        preload={preload}
         style={{ height: box, maxHeight: box, width: "auto", maxWidth: "100%", objectFit: "contain" }}
       />
     </div>
   );
 }
+
+/** One illustration file and its intrinsic size. */
+export type ArtSource = { src: string; width: number; height: number };
 
 /** Intrinsic sizes from the Icons8 download responses (see web/icons8.json). */
 export const ART = {
@@ -48,4 +52,4 @@ export const ART = {
   ask: { src: "/illustrations/ask.svg", width: 1400, height: 1300 },
   search: { src: "/illustrations/search.svg", width: 1100, height: 1100 },
   noResults: { src: "/illustrations/no-results.svg", width: 1000, height: 1000 },
-} as const;
+} as const satisfies Record<string, ArtSource>;

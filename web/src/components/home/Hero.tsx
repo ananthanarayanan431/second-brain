@@ -43,7 +43,7 @@ export function Hero() {
             ))}
           </ul>
         </div>
-        <Illustration {...ART.hero} box={420} priority />
+        <Illustration {...ART.hero} box={420} preload />
       </div>
     </section>
   );

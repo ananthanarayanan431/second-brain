@@ -3,7 +3,12 @@ import { Inter, JetBrains_Mono, Newsreader } from "next/font/google";
 import "./globals.css";
 
 const display = Inter({ variable: "--font-display", subsets: ["latin"] });
-const heading = Newsreader({ variable: "--font-heading", subsets: ["latin"] });
+const heading = Newsreader({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  // The hero headline uses italic; without it the browser fakes a slanted version.
+  style: ["normal", "italic"],
+});
 const code = JetBrains_Mono({ variable: "--font-code", subsets: ["latin"] });
 
 export const metadata: Metadata = {
